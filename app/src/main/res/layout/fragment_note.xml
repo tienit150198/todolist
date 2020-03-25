@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/frmEditext"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" />
+
+    <FrameLayout
+        android:id="@+id/frmEditext"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/activity_fragment_height"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom">
+
+        <EditText
+            android:id="@+id/edt_add"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/activity_fragment_height"
+            android:background="@drawable/custom_editext"
+            android:textSize="@dimen/frg_note_editext_size" />
+
+        <ImageButton
+            android:id="@+id/imgbtn_add"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/activity_fragment_height"
+            android:layout_gravity="right"
+            android:layout_marginRight="5dp"
+            android:src="@drawable/add" />
+    </FrameLayout>
+
+</RelativeLayout>

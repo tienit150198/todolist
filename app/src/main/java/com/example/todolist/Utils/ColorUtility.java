@@ -1,11 +1,24 @@
-package com.example.todolist;
+package com.example.todolist.Utils;
 
+import android.content.Context;
 import android.graphics.Color;
 
 import java.util.ArrayList;
 
 public class ColorUtility {
-    public static ArrayList<Integer> createColor(){
+    private Context mContext;
+    private static ColorUtility instance;
+    private ColorUtility(Context context){
+        mContext = context;
+    }
+    public static ColorUtility getInstance(Context context){
+        if(instance == null){
+            instance = new ColorUtility(context);
+        }
+        return instance;
+    }
+
+    public ArrayList<Integer> createColor(){
         ArrayList<Integer> colorArraylist = new ArrayList<>();
         colorArraylist.add(Color.WHITE);
         colorArraylist.add(Color.LTGRAY);
@@ -17,7 +30,7 @@ public class ColorUtility {
         return colorArraylist;
     }
 
-    public static int getColor(int number){
+    public int getColor(int number){
         ArrayList<Integer> listColor = createColor();
         if(number < listColor.size())
             return listColor.get(number);

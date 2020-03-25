@@ -1,4 +1,4 @@
-package com.example.todolist;
+package com.example.todolist.Controller;
 
 public interface ItemTouchHelperAdapter {
     void onItemMove(int fromPosition, int toPosition);

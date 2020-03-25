@@ -1,6 +1,9 @@
-package com.example.todolist;
+package com.example.todolist.Models;
 
 import android.os.Build;
+
+import com.example.todolist.MainActivity;
+import com.example.todolist.Utils.DateUtility;
 
 import java.time.LocalDate;
 
@@ -12,12 +15,13 @@ public class Note {
     private boolean isEdited;
     private LocalDate dateCreate;
 
+    public Note() {
+
+    }
+
     public Note(String content) {
         this.content = content;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            this.dateCreate = DateUtility.getCurrentDate();
-        }
         this.isChecked = false;
         this.isEdited = false;
         this.color = 0;
@@ -28,9 +32,15 @@ public class Note {
         this.content = content;
         this.color = color;
         this.isChecked = isChecked;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            this.dateCreate = DateUtility.getCurrentDate();
-        }
+        this.isEdited = false;
+    }
+
+    public Note(int id, String content, int color, boolean isChecked, LocalDate dateCreate) {
+        this.id = id;
+        this.content = content;
+        this.color = color;
+        this.isChecked = isChecked;
+        this.dateCreate = dateCreate;
         this.isEdited = false;
     }
 

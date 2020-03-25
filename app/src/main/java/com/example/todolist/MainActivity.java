@@ -1,29 +1,43 @@
 package com.example.todolist;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.EditText;
-import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.todolist.Adapter.ItemAdapter;
+import com.example.todolist.Controller.DialogHandler;
+import com.example.todolist.Controller.NoteModify;
+import com.example.todolist.Controller.SharedPreferenceHandler;
+import com.example.todolist.Models.Item;
+import com.example.todolist.Utils.Validate;
+import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    public EditText edtAdd;
-    private RecyclerView Recyclerview;
-    private NoteAdapter noteAdapter;
-    private ImageButton imgbtnAdd;
-    private NoteModify instance;
-    private ArrayList<Note> noteArrayList = new ArrayList<>();;
+    private DrawerLayout mDrawerLayout;
+    private NavigationView mNavigationView;
+    private Toolbar mToolbar;
+    private ItemAdapter mItemAdapterListItem;
+    private ArrayList<Item> mListItemTask;
+    private RecyclerView mRecyclerViewListTask;
+    private NoteModify instanceNoteModify;  // manager Database, item in sublist
+    private SharedPreferenceHandler instanceSharedPreference;   // manager sublist in navigation drawer
+    private Validate instanceValidate;   // manager sublist in navigation drawer
+    private NoteFragment mNoteFragment;
+    private DialogHandler mDialogHander;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,130 +45,173 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         init();
+        configActionBar();
+        configAnimation();
         configRecyclerView();
-        setDragAndSwipeRecyclerView();
-        setClickListener();
+        setClick();
     }
 
     private void init() {
         mapp();
-        initNote();
-    }
-
-    private void initNote() {
-        instance = NoteModify.getInstance(this);
+        initArrayList();
+        initDialogHander();
     }
 
     private void mapp() {
-        Recyclerview = findViewById(R.id.recyclerview);
-        edtAdd = findViewById(R.id.edt_add);
-        imgbtnAdd = findViewById(R.id.imgbtn_add);
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        mNavigationView = findViewById(R.id.nav_view);
+        mToolbar = findViewById(R.id.toolbar);
+        mRecyclerViewListTask = mNavigationView.findViewById(R.id.recycler_listTask);
+
+        instanceNoteModify = NoteModify.getInstance(this);
+        instanceSharedPreference = SharedPreferenceHandler.getInstance(this);
+        instanceValidate = Validate.getInstance(this);
+    }
+
+    private void initArrayList() {
+        mListItemTask = new ArrayList<>();
+    }
+
+    private void initDialogHander() {
+        mDialogHander = new DialogHandler();
+    }
+
+    private void configActionBar() {
+        setSupportActionBar(mToolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeAsUpIndicator(R.drawable.dehaze);
+        }
+    }
+
+    private void configAnimation() {
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close);
+        mDrawerLayout.addDrawerListener(actionBarDrawerToggle);
+        actionBarDrawerToggle.syncState();
     }
 
     private void configRecyclerView() {
-        noteAdapter = new NoteAdapter(noteArrayList, this);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        mItemAdapterListItem = new ItemAdapter(mListItemTask, this);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
-        Recyclerview.setAdapter(noteAdapter);
-        Recyclerview.addItemDecoration(dividerItemDecoration);
-        Recyclerview.setLayoutManager(linearLayoutManager);
+        mRecyclerViewListTask.setAdapter(mItemAdapterListItem);
+        mRecyclerViewListTask.setLayoutManager(linearLayoutManager);
+        mRecyclerViewListTask.setHasFixedSize(true);
 
-        noteArrayList.addAll(instance.queryAllData());
-        noteAdapter.notifyDataSetChanged();
+        querySubList();
+        selectedItem(0);
     }
 
-    private void setDragAndSwipeRecyclerView() {
-        ItemTouchHelper.Callback callback = new SimpleItemTouchHelper(new ItemTouchHelperAdapter() {
-            @Override
-            public void onItemMove(int fromPosition, int toPosition) {
-                Note noteFrom = noteArrayList.get(fromPosition);
-                Note noteTo = noteArrayList.get(toPosition);
-
-                instance.changeIndexWhenMove(fromPosition, toPosition, noteFrom.getId(), noteTo.getId(), toPosition > fromPosition);
-                noteArrayList.add(toPosition, noteArrayList.remove(fromPosition));
-                noteAdapter.notifyItemMoved(fromPosition, toPosition);
-            }
-
-            @Override
-            public void onItemDissmiss(int position, int direction) {
-                // swipe start ( right -> left ) is delete, swipe end ( left -> right ) change color
-                Note note = noteArrayList.get(position);
-                if (direction == ItemTouchHelper.START) {
-                    // update Sqlite
-                    noteArrayList.remove(position);
-                    noteAdapter.notifyItemRemoved(position);
-                    instance.deleteNote(note.getId());
-
-                } else {
-                    note.setColor(note.getColor() + 1);// Update Color
-                    noteArrayList.set(position, note);
-                    instance.updateNote(note.getId(), note);
-                    noteAdapter.notifyItemChanged(position);
-                }
-            }
-        });
-        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
-        touchHelper.attachToRecyclerView(Recyclerview); // set touch in recyclerview
+    private void setClick() {
+        mItemAdapterListItem.setOnItemClickListener((view, position) -> selectedItem(position));
     }
 
-    private void setClickListener() {
-        imgbtnAdd.setOnClickListener(v -> {
-            String text = edtAdd.getText().toString();
-            if (!text.equals("")) {
-
-                int findIndexEdited = getPositionEdited(noteArrayList);
-                // check state edit or add?
-                if (findIndexEdited != -1) {
-                    Note note = noteArrayList.get(findIndexEdited);
-                    note.setContent(text);
-
-                    noteArrayList.set(findIndexEdited, note);
-                    instance.updateNote(note.getId(), note);// update Sqlite
-                    noteAdapter.notifyItemChanged(findIndexEdited);
-                } else {
-                    Note note = makeNote(text);
-                    noteArrayList.add(note);
-                    instance.insertNote(note, noteArrayList.size() - 1);     // add Sqlite
-                    noteAdapter.notifyItemInserted(noteArrayList.size() - 1);
-                }
-                edtAdd.setText("");
-            }
-        });
-
-        noteAdapter.setOnItemClickListener((view, position) -> {
-            Note noteClicked = noteArrayList.get(position);
-            noteArrayList = setEditedInArrayList(noteArrayList, noteClicked, position);
-            setTextEditext(noteClicked.getContent());
-        });
+    private void selectedItem(int position) {
+        mToolbar.setTitle(mListItemTask.get(position).getName());
+        mNavigationView.setCheckedItem(position);
+        clickFragment(position);
+        mDrawerLayout.closeDrawers();
     }
 
-    public ArrayList<Note> setEditedInArrayList(ArrayList<Note> noteArrayList, Note note, int position) {
-        for (Note element : noteArrayList) {
-            element.setEdited(false);
+    private void querySubList() {
+        mListItemTask.clear();
+
+//        mListItemTask.add(makeItem(R.drawable.all_list, "All"));
+        ArrayList<Item> getData = instanceSharedPreference.getData(this, getString(R.string.share_preference_key));
+        if (getData != null) {
+            mListItemTask.addAll(getData);
         }
-        note.setEdited(true);
-        noteArrayList.set(position, note);
-        return noteArrayList;
+
+        // set default in first run app
+        if (mListItemTask.size() == 0) {
+            mListItemTask.add(makeItem(R.drawable.all_list, getString(R.string.sub_list_default)));
+        }
+        mItemAdapterListItem.notifyDataSetChanged();
     }
 
-    public int getPositionEdited(ArrayList<Note> noteArrayList) {
-        int index = -1;
-        for (int i = 0; i < noteArrayList.size(); i++) {
-            if (noteArrayList.get(i).isEdited() == true) {
-                index = i;
+    private void clickFragment(int position) {
+        Bundle bundle = new Bundle();
+        bundle.putString(getString(R.string.bundle_send_fragment), mListItemTask.get(position).getName());
+        mNoteFragment = new NoteFragment();
+        mNoteFragment.setArguments(bundle);
+
+        getSupportFragmentManager().beginTransaction().replace(R.id.frm_main, mNoteFragment).commit();
+    }
+
+    private Item makeItem(int idIcon, String subName) {
+        return new Item(idIcon, subName);
+    }
+
+    private void deleteSublist() {
+        String sublistCurrent = mToolbar.getTitle().toString();
+        int idSublistSelected = instanceValidate.findIndexWithId(mListItemTask, sublistCurrent);
+
+        boolean deleted = mNoteFragment.deleteSublist(sublistCurrent);
+        // must always have the All sublist. Cannot delete sublist All
+        if (idSublistSelected != -1 && !sublistCurrent.equals(getString(R.string.sub_list_default))) {
+            mListItemTask.remove(idSublistSelected);
+            instanceSharedPreference.saveData(this, getString(R.string.share_preference_key), mListItemTask);
+            if (mListItemTask.size() > 0) {
+                selectedItem(0);
+            }
+        }
+        mItemAdapterListItem.notifyItemRemoved(idSublistSelected);
+    }
+
+    private void addSublist() {
+        mDialogHander.Input(this, instanceNoteModify.queryAllSublist(), getString(R.string.dialog_title_notify), "", getString(R.string.dialog_button_cancel), getString(R.string.dialog_button_ok), new DialogHandler.OnDialogClick() {
+            @Override
+            public void onNegativeClick() {
+            }
+
+            @Override
+            public void onPositiveClick(String text) {
+                if (text.trim().isEmpty()) {
+                    mDialogHander.notify(MainActivity.this, getString(R.string.dialog_title_notify), getString(R.string.dialog_messenger_empty), getString(R.string.dialog_button_ok));
+                } else if (instanceValidate.checkContainsInArrayList(mListItemTask, text.trim())) {
+                    mDialogHander.notify(MainActivity.this, getString(R.string.dialog_title_notify), getString(R.string.dialog_messenger_existed), getString(R.string.dialog_button_ok));
+                } else {
+                    mListItemTask.add(makeItem(R.drawable.sublist, text.trim()));
+                    mItemAdapterListItem.notifyItemInserted(mListItemTask.size() - 1);
+                    instanceSharedPreference.saveData(MainActivity.this, getString(R.string.share_preference_key), mListItemTask);
+
+                    selectedItem(instanceValidate.findIndexWithId(mListItemTask, text.trim()));
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawers();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
                 break;
-            }
+            case R.id.it_add:
+                Toast.makeText(this, getString(R.string.toast_menu_add_item), Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.it_add_sublist:
+                addSublist();
+                break;
+            case R.id.it_delete:
+                Toast.makeText(this, getString(R.string.toast_menu_delete_item), Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.it_delete_sublist:
+                deleteSublist();
+                break;
         }
-        return index;
-    }
-
-    private Note makeNote(String content) {
-        return new Note(content);
-    }
-
-    public void setTextEditext(String text) {
-        edtAdd.setText(text);
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -163,33 +220,5 @@ public class MainActivity extends AppCompatActivity {
         menuInflater.inflate(R.menu.menu_main, menu);
 
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.it_delete:
-                DialogHandler dialogHandler = new DialogHandler();
-                dialogHandler.Confirm(this, "Confirm delelte", "You want delete all note?", "Cancel", "OK",
-                        cancelProc(), okProc());
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    public Runnable okProc() {
-        return () -> {
-            Log.d("LOG_DIALOG_CLICKED", "cancelProc: clicked OK");
-            instance.deleteAll();
-            noteArrayList.clear();
-            noteAdapter.notifyDataSetChanged();
-        };
-    }
-
-    public Runnable cancelProc() {
-        return () -> {
-            Log.d("LOG_DIALOG_CLICKED", "cancelProc: clicked Cancel");
-        };
     }
 }

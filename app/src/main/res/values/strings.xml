@@ -1,4 +1,34 @@
 <resources>
     <string name="app_name">To Do List</string>
+    <string name="sub_list_default">All</string>
+
+    <!--    bundle-->
+    <string name="bundle_send_fragment">sublistName</string>
+
+    <!--    Toast-->
+    <string name="toast_menu_add_item">Add item</string>
+    <string name="toast_menu_delete_item">Delete item</string>
+
+    <!--    menu-->
     <string name="menu_item_delete">delete</string>
+    <string name="menu_item_delete_sublist">delete list</string>
+    <string name="menu_item_add">add</string>
+    <string name="menu_item_add_sublist">add list</string>
+
+    <!--    navigation-->
+    <string name="nav_header">To Do List</string>
+    <string name="navigation_drawer_close">Close</string>
+    <string name="navigation_drawer_open">Open</string>
+
+    <!--    share preference-->
+    <string name="share_preference_name">List Item</string>
+    <string name="share_preference_key">Item</string>
+
+    <!--    Dialog-->
+    <string name="dialog_title_notify">Input</string>
+    <string name="dialog_messenger_empty">Sublist not empty</string>
+    <string name="dialog_messenger_existed">Sublist not exitsted</string>
+    <string name="dialog_button_ok">OK</string>
+    <string name="dialog_button_cancel">CANCEL</string>
+
 </resources>

@@ -1,4 +1,4 @@
-package com.example.todolist;
+package com.example.todolist.Database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -20,7 +20,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String CREATE_TABLE =
             "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + KEY_CONTENT + " TEXT," + KEY_NAME_SUB_LIST + " TEXT,"
                     + KEY_COMPLETED + " BIT DEFAULT 0, " + KEY_COLOR + " INTEGER DEFAULT 0, " + KEY_INDEX + " INTEGER, " +
-                    KEY_DATE_CREATE + " TEXT" + ")";
+                     KEY_DATE_CREATE + " TEXT" + ")";
     private static final String DELETE_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
 
     public DatabaseHandler(Context context) {

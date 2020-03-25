@@ -2,9 +2,25 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-    android:id="@+id/it_delete"
-    android:icon="@drawable/delete"
-    android:title="@string/menu_item_delete"
-    app:showAsAction="always"
-    />
+        android:id="@+id/it_add_sublist"
+        android:icon="@drawable/add_list"
+        android:title="@string/menu_item_add_sublist"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/it_delete_sublist"
+        android:icon="@drawable/delete_sublist"
+        android:title="@string/menu_item_delete_sublist"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/it_add"
+        android:icon="@drawable/add"
+        android:title="@string/menu_item_add"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/it_delete"
+        android:icon="@drawable/delete"
+        android:title="@string/menu_item_delete"
+        app:showAsAction="never" />
+
 </menu>

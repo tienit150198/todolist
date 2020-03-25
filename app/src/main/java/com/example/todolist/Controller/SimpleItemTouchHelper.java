@@ -1,4 +1,4 @@
-package com.example.todolist;
+package com.example.todolist.Controller;
 
 import android.graphics.Color;
 
