@@ -1,47 +1,50 @@
 package com.example.todolist.Models;
 
-import android.os.Build;
+import android.graphics.Color;
+import android.location.Location;
 
-import com.example.todolist.MainActivity;
-import com.example.todolist.Utils.DateUtility;
-
+import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Date;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class Note {
+import io.realm.RealmObject;
+import io.realm.annotations.Ignore;
+import io.realm.annotations.PrimaryKey;
+
+public class Note extends RealmObject{
+    @PrimaryKey
     private int id;
     private String content;
     private int color;
     private boolean isChecked;
-    private boolean isEdited;
-    private LocalDate dateCreate;
+    private int index;
+    private String nameSublist;
+    private Date dateCreate;
+    public Note(){}
 
-    public Note() {
-
-    }
-
-    public Note(String content) {
+    public Note(int id, String content, int index) {
+        this.id = id;
         this.content = content;
-
-        this.isChecked = false;
-        this.isEdited = false;
+        this.index = index;
         this.color = 0;
     }
 
-    public Note(int id, String content, int color, boolean isChecked) {
+    public Note(int id, String content, int index, String nameSublist) {
         this.id = id;
         this.content = content;
-        this.color = color;
-        this.isChecked = isChecked;
-        this.isEdited = false;
+        this.index = index;
+        this.nameSublist = nameSublist;
+        this.color = 0;
     }
 
-    public Note(int id, String content, int color, boolean isChecked, LocalDate dateCreate) {
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
         this.id = id;
-        this.content = content;
-        this.color = color;
-        this.isChecked = isChecked;
-        this.dateCreate = dateCreate;
-        this.isEdited = false;
     }
 
     public String getContent() {
@@ -68,20 +71,28 @@ public class Note {
         isChecked = checked;
     }
 
-    public LocalDate getDateCreate() {
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public String getNameSublist() {
+        return nameSublist;
+    }
+
+    public void setNameSublist(String nameSublist) {
+        this.nameSublist = nameSublist;
+    }
+
+    public Date getDateCreate() {
         return dateCreate;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public boolean isEdited() {
-        return isEdited;
-    }
-
-    public void setEdited(boolean edited) {
-        isEdited = edited;
+    public void setDateCreate(Date dateCreate) {
+        this.dateCreate = dateCreate;
     }
 
     @Override
@@ -89,6 +100,11 @@ public class Note {
         return "Note{" +
                 "id=" + id +
                 ", content='" + content + '\'' +
+                ", color=" + color +
+                ", isChecked=" + isChecked +
+                ", index=" + index +
+                ", nameSublist='" + nameSublist + '\'' +
+                ", dateCreate=" + dateCreate +
                 '}';
     }
 }

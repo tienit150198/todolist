@@ -1,8 +1,8 @@
 package com.example.todolist.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Paint;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,27 +10,25 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.todolist.Controller.NoteModify;
+import com.example.todolist.Interface.OnItemListenerHelper;
+import com.example.todolist.MainActivity;
 import com.example.todolist.Models.Note;
 import com.example.todolist.R;
 import com.example.todolist.Utils.ColorUtility;
 
-import java.util.ArrayList;
+import io.realm.OrderedRealmCollection;
+import io.realm.RealmRecyclerViewAdapter;
 
-public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
-    private ArrayList<Note> noteArrayList;
-    private Context mContext;
-    private OnItemClickListener listener;
-    private NoteModify instanceNoteModify;
+public class NoteAdapter extends RealmRecyclerViewAdapter<Note, NoteAdapter.ViewHolder> {
+    private OnItemListenerHelper listener;
     private ColorUtility instanceColor;
 
-    public NoteAdapter(ArrayList<Note> contentArrayList, Context context) {
-        this.noteArrayList = contentArrayList;
-        this.mContext = context;
-
-        instanceNoteModify = NoteModify.getInstance(context);
+    public NoteAdapter(@Nullable OrderedRealmCollection<Note> data, boolean autoUpdate, Context context, OnItemListenerHelper listener) {
+        super(context, data, autoUpdate);
+        this.listener = listener;
         instanceColor = ColorUtility.getInstance(context);
     }
 
@@ -45,13 +43,13 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-        final Note content = noteArrayList.get(position);
-        holder.tvContent.setText(content.getContent());
-        holder.cbContent.setBackgroundColor(instanceColor.getColor(content.getColor()));
-        holder.tvContent.setBackgroundColor(instanceColor.getColor(content.getColor()));
+        final Note note = getItem(position);
+        holder.tvContent.setText(note.getContent());
+        holder.cbContent.setBackgroundColor(instanceColor.getColor(note.getColor()));
+        holder.tvContent.setBackgroundColor(instanceColor.getColor(note.getColor()));
 
         // check checked
-        if (content.isChecked()) {
+        if (note.isChecked()) {
             holder.cbContent.setChecked(true);
         } else {
             holder.cbContent.setChecked(false);
@@ -59,26 +57,14 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
     }
 
     @Override
-    public int getItemCount() {
-        return noteArrayList.size();
-    }
-
-    @Override
     public long getItemId(int position) {
         return position;
-    }
-
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.listener = listener;
-    }
-
-    public interface OnItemClickListener {
-        void onItemClick(View view, int position);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
         private CheckBox cbContent;
         private TextView tvContent;
+        private View tvDelete;
 
         public ViewHolder(@NonNull final View itemView) {
             super(itemView);
@@ -87,24 +73,24 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
             //   this.setIsRecyclable(false);    // recycler not reused view
 
             itemView.setOnClickListener(v -> {
+                Intent it = new Intent(itemView.getContext(), MainActivity.class);
+                itemView.getContext().startActivity(it);
+
                 if (listener != null) {
                     listener.onItemClick(itemView, getLayoutPosition());
                 }
             });
 
             cbContent.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                Note note = noteArrayList.get(getLayoutPosition());
-                note.setChecked(isChecked);
-                noteArrayList.set(getLayoutPosition(), note);
-                if (isChecked) {
-                    tvContent.setPaintFlags(tvContent.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                } else {
-                    tvContent.setPaintFlags(0);
+                if (listener != null) {
+                    if (isChecked) {
+                        tvContent.setPaintFlags(tvContent.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                    } else {
+                        tvContent.setPaintFlags(0);
+                    }
+                    listener.onChangeCheckedListener(buttonView, isChecked, getLayoutPosition());
                 }
-                Log.d("LOG_CLICKED_CHECKBOX", "onCheckedChanged: " + note);
-                instanceNoteModify.updateNote(note.getId(), note);    // update Sqlite
             });
         }
-
     }
 }

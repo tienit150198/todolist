@@ -10,8 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/frmEditext"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true" />
 
     <FrameLayout
         android:id="@+id/frmEditext"
@@ -23,7 +23,7 @@
         <EditText
             android:id="@+id/edt_add"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/activity_fragment_height"
+            android:layout_height="match_parent"
             android:background="@drawable/custom_editext"
             android:textSize="@dimen/frg_note_editext_size" />
 
@@ -33,7 +33,9 @@
             android:layout_height="@dimen/activity_fragment_height"
             android:layout_gravity="right"
             android:layout_marginRight="5dp"
-            android:src="@drawable/add" />
+            android:src="@drawable/send"
+            android:background="@null"
+            />
     </FrameLayout>
 
 </RelativeLayout>

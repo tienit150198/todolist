@@ -13,6 +13,7 @@
     <string name="menu_item_delete">delete</string>
     <string name="menu_item_delete_sublist">delete list</string>
     <string name="menu_item_add">add</string>
+    <string name="menu_item_save">save</string>
     <string name="menu_item_add_sublist">add list</string>
 
     <!--    navigation-->
@@ -26,9 +27,41 @@
 
     <!--    Dialog-->
     <string name="dialog_title_notify">Input</string>
+    <string name="dialog_title_activity_edit">EditActivity</string>
+    <string name="dialog_title_chooseRadioButton">Please choose List</string>
     <string name="dialog_messenger_empty">Sublist not empty</string>
     <string name="dialog_messenger_existed">Sublist not exitsted</string>
     <string name="dialog_button_ok">OK</string>
     <string name="dialog_button_cancel">CANCEL</string>
+    <string name="hint_sublist">input name sublist</string>
 
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <!--    Layout-->
+    <string name="hint_content">Content</string>
+    <string name="completed">Completed</string>
+    <string name="sublist">List</string>
+    <string name="color">Color</string>
+    <string name="text_demo">Working</string>
+
+
+    <!--    Chauthai swipe  -->
+    <string name="tv_delete">Delete</string>
+    <string name="tv_edit">Edit</string>
+
+
+<!--    Color-->
+    <string name="colorWhite">FFFFFFFF</string>
+    <string name="colorLYellow">B5FFEB3B</string>
+    <string name="colorLBlue">AD00BCD4</string>
+    <string name="colorLGreen">C38BC34A</string>
+    <string name="colorLRed">77F44336</string>
+    <string name="colorLPink">7EE91E63</string>
+    <string name="colorBlue_2">C6F9FF</string>
+    <string name="colorYellow_2">FAFFC9</string>
+    <string name="colorGreen_2">EFFFDC</string>
 </resources>

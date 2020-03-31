@@ -1,6 +1,6 @@
 <resources>
 
-    <!-- Base application theme. -->
+    <!--    Activity-->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -8,4 +8,37 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <!--    TextInputLayout-->
+    <style name="CustomTextInputLayoutStyle.ErrorTextStyle" parent="TextAppearance.Design.Error">
+        <item name="android:textSize">20sp</item>
+        <item name="android:paddingBottom">10dp</item>
+    </style>
+
+    <!--    Layout-->
+    <style name="text_bold">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!--    Divider-->
+    <style name="Divider">
+        <item name="android:background">?android:attr/listDivider</item>
+    </style>
+
+    <style name="Divider.Horizontal" parent="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        // You can change thickness here.
+
+    </style>
+
+    <style name="Divider.Vertical" parent="Divider">
+        <item name="android:layout_width">1dp</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+    K
 </resources>

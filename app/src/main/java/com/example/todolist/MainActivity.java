@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,23 +18,30 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.todolist.Adapter.ItemAdapter;
+import com.example.todolist.Constants.Constants;
 import com.example.todolist.Controller.DialogHandler;
-import com.example.todolist.Controller.NoteModify;
+import com.example.todolist.Controller.ItemModify;
 import com.example.todolist.Controller.SharedPreferenceHandler;
+import com.example.todolist.Interface.OnItemListenerHelper;
 import com.example.todolist.Models.Item;
 import com.example.todolist.Utils.Validate;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
+
+public class MainActivity extends AppCompatActivity implements OnItemListenerHelper {
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
     private Toolbar mToolbar;
     private ItemAdapter mItemAdapterListItem;
-    private ArrayList<Item> mListItemTask;
+    private RealmResults<Item> mRealmResult;
+    private Realm mRealm;
+    private ItemModify instanceItem;
     private RecyclerView mRecyclerViewListTask;
-    private NoteModify instanceNoteModify;  // manager Database, item in sublist
     private SharedPreferenceHandler instanceSharedPreference;   // manager sublist in navigation drawer
     private Validate instanceValidate;   // manager sublist in navigation drawer
     private NoteFragment mNoteFragment;
@@ -45,15 +53,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         init();
-        configActionBar();
-        configAnimation();
-        configRecyclerView();
-        setClick();
+        config();
     }
 
     private void init() {
         mapp();
-        initArrayList();
+        initRealm();
+        initItem();
         initDialogHander();
     }
 
@@ -62,18 +68,39 @@ public class MainActivity extends AppCompatActivity {
         mNavigationView = findViewById(R.id.nav_view);
         mToolbar = findViewById(R.id.toolbar);
         mRecyclerViewListTask = mNavigationView.findViewById(R.id.recycler_listTask);
-
-        instanceNoteModify = NoteModify.getInstance(this);
-        instanceSharedPreference = SharedPreferenceHandler.getInstance(this);
-        instanceValidate = Validate.getInstance(this);
     }
 
-    private void initArrayList() {
-        mListItemTask = new ArrayList<>();
+    private void initRealm() {
+        Realm.init(this);
+        RealmConfiguration configNote = new RealmConfiguration.Builder().name(Constants.KEY_TABLE_NAME_ITEM)
+                .schemaVersion(1)
+                .build();
+
+        mRealm = Realm.getInstance(configNote);
+    }
+
+    private void initItem() {
+        instanceItem = ItemModify.getInstance(mRealm);
+        mRealmResult = instanceItem.queryAllItem();
+
+        if (mRealmResult.size() == 0) {
+            instanceItem.insertItem(makeItem(R.drawable.all_list, Constants.KEY_SUBLIST_DEFAULT));
+        }
     }
 
     private void initDialogHander() {
         mDialogHander = new DialogHandler();
+    }
+
+    private void config() {
+        instanceSharedPreference = SharedPreferenceHandler.getInstance(this);
+        instanceValidate = Validate.getInstance(this);
+
+        configActionBar();
+        configAnimation();
+        configRecyclerView();
+
+
     }
 
     private void configActionBar() {
@@ -93,51 +120,40 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void configRecyclerView() {
-        mItemAdapterListItem = new ItemAdapter(mListItemTask, this);
+        mItemAdapterListItem = new ItemAdapter(this, mRealmResult, true, this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
         mRecyclerViewListTask.setAdapter(mItemAdapterListItem);
         mRecyclerViewListTask.setLayoutManager(linearLayoutManager);
         mRecyclerViewListTask.setHasFixedSize(true);
 
-        querySubList();
         selectedItem(0);
     }
 
-    private void setClick() {
-        mItemAdapterListItem.setOnItemClickListener((view, position) -> selectedItem(position));
-    }
-
     private void selectedItem(int position) {
-        mToolbar.setTitle(mListItemTask.get(position).getName());
+        mToolbar.setTitle(mRealmResult.get(position).getName());
         mNavigationView.setCheckedItem(position);
         clickFragment(position);
         mDrawerLayout.closeDrawers();
     }
 
-    private void querySubList() {
-        mListItemTask.clear();
-
-//        mListItemTask.add(makeItem(R.drawable.all_list, "All"));
-        ArrayList<Item> getData = instanceSharedPreference.getData(this, getString(R.string.share_preference_key));
-        if (getData != null) {
-            mListItemTask.addAll(getData);
-        }
-
-        // set default in first run app
-        if (mListItemTask.size() == 0) {
-            mListItemTask.add(makeItem(R.drawable.all_list, getString(R.string.sub_list_default)));
-        }
-        mItemAdapterListItem.notifyDataSetChanged();
-    }
-
     private void clickFragment(int position) {
         Bundle bundle = new Bundle();
-        bundle.putString(getString(R.string.bundle_send_fragment), mListItemTask.get(position).getName());
+        bundle.putString(Constants.KEY_BUNDLE_SEND_FRAGMENT_SUBLISTNAME, mRealmResult.get(position).getName());
+        bundle.putStringArrayList(Constants.KEY_BUNDLE_SEND_FRAGMENT_LIST_NAME, convertRealmResultToArray(mRealmResult));
         mNoteFragment = new NoteFragment();
         mNoteFragment.setArguments(bundle);
 
         getSupportFragmentManager().beginTransaction().replace(R.id.frm_main, mNoteFragment).commit();
+    }
+
+    private ArrayList<String> convertRealmResultToArray(RealmResults<Item> mRealmResult) {
+        ArrayList<String> listName = new ArrayList<>();
+        for (Item item : mRealmResult) {
+            listName.add(item.getName());
+        }
+
+        return listName;
     }
 
     private Item makeItem(int idIcon, String subName) {
@@ -145,39 +161,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void deleteSublist() {
-        String sublistCurrent = mToolbar.getTitle().toString();
-        int idSublistSelected = instanceValidate.findIndexWithId(mListItemTask, sublistCurrent);
+        String nameSublistCurrent = mToolbar.getTitle().toString();
+        int idSublistSelected = instanceValidate.findIndexWithId(mRealmResult, nameSublistCurrent);
 
-        boolean deleted = mNoteFragment.deleteSublist(sublistCurrent);
+        mNoteFragment.deleteSublist(nameSublistCurrent);
         // must always have the All sublist. Cannot delete sublist All
-        if (idSublistSelected != -1 && !sublistCurrent.equals(getString(R.string.sub_list_default))) {
-            mListItemTask.remove(idSublistSelected);
-            instanceSharedPreference.saveData(this, getString(R.string.share_preference_key), mListItemTask);
-            if (mListItemTask.size() > 0) {
+        if (idSublistSelected != -1 && !nameSublistCurrent.equals(Constants.KEY_SUBLIST_DEFAULT)) {
+            instanceItem.deleteItem(nameSublistCurrent);
+
+            if (mRealmResult.size() > 0) {
                 selectedItem(0);
             }
         }
-        mItemAdapterListItem.notifyItemRemoved(idSublistSelected);
     }
 
     private void addSublist() {
-        mDialogHander.Input(this, instanceNoteModify.queryAllSublist(), getString(R.string.dialog_title_notify), "", getString(R.string.dialog_button_cancel), getString(R.string.dialog_button_ok), new DialogHandler.OnDialogClick() {
+        mDialogHander.Input(this, getString(R.string.dialog_title_notify), "", getString(R.string.dialog_button_cancel), getString(R.string.dialog_button_ok), new DialogHandler.OnDialogClick() {
             @Override
-            public void onNegativeClick() {
+            public void onNegativeClick(String text) {
             }
 
             @Override
             public void onPositiveClick(String text) {
                 if (text.trim().isEmpty()) {
                     mDialogHander.notify(MainActivity.this, getString(R.string.dialog_title_notify), getString(R.string.dialog_messenger_empty), getString(R.string.dialog_button_ok));
-                } else if (instanceValidate.checkContainsInArrayList(mListItemTask, text.trim())) {
+                } else if (instanceValidate.checkContainsInArrayList(mRealmResult, text.trim())) {
                     mDialogHander.notify(MainActivity.this, getString(R.string.dialog_title_notify), getString(R.string.dialog_messenger_existed), getString(R.string.dialog_button_ok));
                 } else {
-                    mListItemTask.add(makeItem(R.drawable.sublist, text.trim()));
-                    mItemAdapterListItem.notifyItemInserted(mListItemTask.size() - 1);
-                    instanceSharedPreference.saveData(MainActivity.this, getString(R.string.share_preference_key), mListItemTask);
-
-                    selectedItem(instanceValidate.findIndexWithId(mListItemTask, text.trim()));
+                    instanceItem.insertItem(makeItem(R.drawable.sublist, text.trim()));
+                    selectedItem(instanceValidate.findIndexWithId(mRealmResult, text.trim()));
                 }
             }
         });
@@ -220,5 +232,25 @@ public class MainActivity extends AppCompatActivity {
         menuInflater.inflate(R.menu.menu_main, menu);
 
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        // close database
+        if (!mRealm.isClosed()) {
+            mRealm.close();
+        }
+        mNoteFragment.closeRealm();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onItemClick(View view, int position) {
+        selectedItem(position);
+    }
+
+    @Override
+    public void onChangeCheckedListener(View view, boolean isChecked, int position) {
+
     }
 }

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".EditActivity"
+    android:orientation="vertical"
+    android:background="@color/colorWhite"
+    >
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_edit"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorToolbar"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
+
+    <LinearLayout
+        android:showDividers="middle|end"
+        android:divider="@drawable/divider"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar_edit"
+        android:layout_marginTop="@dimen/activity_margin_content_top"
+        android:background="@color/colorWhite"
+        android:orientation="vertical"
+        >
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/edt_layout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/nav_height_drawer_item"
+            android:textColorHint="#E91E63"
+            app:hintEnabled="true"
+            app:hintTextAppearance="@style/CustomTextInputLayoutStyle.ErrorTextStyle">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/tedt_content_edit"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/nav_height_drawer_item"
+                android:hint="@string/hint_content"
+                android:text="@string/text_demo"
+                android:textSize="@dimen/frg_note_editext_size"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <FrameLayout
+            android:id="@+id/frm_competed_edit"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/nav_height_drawer_item"
+            android:layout_marginTop="@dimen/activity_margin_completed_top">
+
+            <CheckBox
+                android:id="@+id/cb_content_edit"
+                android:layout_width="@dimen/activity_layout_width"
+                android:layout_height="@dimen/nav_height_drawer_item"
+                android:button="@null"
+                android:foreground="@drawable/custom_checkbox"
+                android:foregroundGravity="center"
+                android:padding="@dimen/activity_padding"
+                android:textSize="@dimen/frg_note_editext_size" />
+
+            <TextView
+                android:id="@+id/tv_content_edit"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/nav_height_drawer_item"
+                android:layout_marginLeft="@dimen/activity_margin_left"
+                android:background="@color/colorWhite"
+                android:gravity="center_vertical"
+                android:text="@string/completed"
+                android:textSize="@dimen/menu_item_checkbox_textSize"
+                android:textStyle="bold" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/frm_sublist_edit"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/nav_height_drawer_item">
+
+            <ImageView
+                android:id="@+id/img_sublist_edit"
+                android:layout_width="@dimen/activity_layout_width"
+                android:layout_height="@dimen/nav_height_drawer_item"
+                android:contentDescription="@string/sublist"
+                android:gravity="center_horizontal|center_vertical"
+                android:padding="@dimen/activity_padding"
+                android:src="@drawable/sublist_edit"
+                android:textSize="@dimen/frg_note_editext_size" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/nav_height_drawer_item"
+                android:orientation="vertical"
+                >
+
+                <TextView
+                    android:id="@+id/tv_sublit_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/activity_height_sublist_top"
+                    android:layout_marginLeft="@dimen/activity_margin_left"
+                    android:background="@color/colorWhite"
+                    android:gravity="center_vertical"
+                    android:text="@string/sublist"
+                    android:textSize="@dimen/menu_item_checkbox_textSize"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_sublist_name_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/activity_height_sublist_bottom"
+                    android:layout_marginLeft="52dp"
+                    android:background="@color/colorWhite"
+                    android:gravity="center_vertical"
+                    android:text="abc"
+                    android:textSize="@dimen/menu_item_checkbox_textSize" />
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+
+        <FrameLayout
+            android:id="@+id/frm_color_edit"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/nav_height_drawer_item"
+
+            >
+
+            <ImageView
+                android:id="@+id/img_color_edit"
+                android:layout_width="@dimen/activity_layout_width"
+                android:layout_height="@dimen/nav_height_drawer_item"
+                android:contentDescription="@string/color"
+                android:gravity="center_horizontal|center_vertical"
+                android:padding="@dimen/activity_padding"
+                android:src="@drawable/color"
+                android:textSize="@dimen/frg_note_editext_size" />
+
+            <TextView
+                android:id="@+id/tv_color_sublist"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/nav_height_drawer_item"
+                android:layout_marginLeft="@dimen/activity_margin_left"
+                android:background="@color/colorWhite"
+                android:gravity="center_vertical"
+                android:text="@string/color"
+                android:textSize="@dimen/frg_note_editext_size"
+                android:textStyle="bold"
+
+                />
+        </FrameLayout>
+    </LinearLayout>
+
+
+</LinearLayout>

@@ -19,7 +19,7 @@
         android:layout_marginLeft="@dimen/nav_item_text_marginleft"
         android:layout_toRightOf="@id/imgIcon"
         android:gravity="center_vertical"
-        android:text="Working"
+        android:text="@string/text_demo"
         android:textSize="@dimen/nav_item_text_size"
         android:textStyle="bold" />
 </RelativeLayout>

@@ -1,13 +1,21 @@
 package com.example.todolist.Models;
 
-import java.io.Serializable;
+import com.example.todolist.R;
 
-public class Item implements Serializable {
+import io.realm.RealmObject;
+import io.realm.annotations.Required;
+
+public class Item extends RealmObject {
     int icon;
+    @Required
     String name;
+
+    public Item() {
+    }
 
     public Item(String name) {
         this.name = name;
+        this.icon = R.drawable.sublist;
     }
 
     public Item(int image, String name) {

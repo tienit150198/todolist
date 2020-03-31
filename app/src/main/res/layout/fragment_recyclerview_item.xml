@@ -1,34 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/menu_item_height">
+    android:layout_height="@dimen/menu_item_height"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="2dp"
+    app:cardBackgroundColor="@color/colorLPink"
+    app:cardElevation="2dp"
+    android:layout_margin="3dp">
 
     <CheckBox
         android:id="@+id/cbContent"
         android:layout_width="@dimen/menu_item_checbox_width"
         android:layout_height="@dimen/menu_item_height"
         android:background="@color/colorWhite"
-        android:paddingLeft="@dimen/frg_recycler_checkbox_marginleft"
-        android:layout_gravity="center_vertical"
+        android:button="@null"
+        android:foreground="@drawable/custom_checkbox"
+        android:foregroundGravity="center"
         android:gravity="center_horizontal|center_vertical"
-        />
+        android:paddingLeft="@dimen/frg_recycler_checkbox_marginleft" />
+
     <TextView
         android:id="@+id/tvContent"
         android:layout_width="match_parent"
         android:layout_height="@dimen/menu_item_height"
-        android:text="abc"
-        android:layout_marginLeft="30dp"
-        android:textSize="@dimen/menu_item_checkbox_textSize"
-        android:paddingLeft="@dimen/frg_recycler_textview_marginleft"
+        android:layout_marginLeft="@dimen/recycler_item_margin_left"
         android:background="@color/colorWhite"
         android:gravity="center_vertical"
-        />
+        android:paddingLeft="@dimen/frg_recycler_textview_marginleft"
+        android:text="@string/text_demo"
+        android:textSize="@dimen/menu_item_checkbox_textSize" />
 
     <ImageView
         android:id="@+id/imgHandle"
-        android:layout_width="wrap_content"
+        android:layout_width="30dp"
         android:layout_height="@dimen/menu_item_height"
         android:layout_gravity="center_vertical|right"
         android:src="@drawable/reorder" />
 
-</FrameLayout>
+</androidx.cardview.widget.CardView>

@@ -7,6 +7,8 @@ import com.example.todolist.Models.Note;
 
 import java.util.ArrayList;
 
+import io.realm.RealmResults;
+
 public class Validate {
     private Context mContext;
     private static Validate instance;
@@ -22,10 +24,10 @@ public class Validate {
         return instance;
     }
 
-    public int findIndexWithId(ArrayList<Note> arrayListNote, int id){
+    public int findIndexWithId(RealmResults<Item> realmResults, String name){
         int index = -1;
-        for(int i = 0 ; i < arrayListNote.size() ; i++){
-            if(arrayListNote.get(i).getId() == id){
+        for(int i = 0 ; i < realmResults.size() ; i++){
+            if(realmResults.get(i).getName().equals(name)){
                 index = i;
                 break;
             }
@@ -33,23 +35,23 @@ public class Validate {
         return index;
     }
 
-    public int findIndexWithId(ArrayList<Item> arrayListItem, String name){
-        int index = -1;
-        for(int i = 0 ; i < arrayListItem.size() ; i++){
-            if(arrayListItem.get(i).getName().equals(name)){
-                index = i;
-                break;
-            }
-        }
-        return index;
-    }
-
-    public boolean checkContainsInArrayList(ArrayList<Item> arrayListItem, String name){
-        for(int i = 0 ; i < arrayListItem.size() ; i++){
-            if(arrayListItem.get(i).getName().equals(name)){
+    public boolean checkContainsInArrayList(RealmResults<Item> realmResults, String name){
+        for(int i = 0 ; i < realmResults.size() ; i++){
+            if(realmResults.get(i).getName().equals(name)){
                 return true;
             }
         }
         return false;
+    }
+
+    public int findIndexWithId(ArrayList<String> listName, String name){
+        int index = -1;
+        for(int i = 0 ; i < listName.size() ; i++){
+            if(listName.get(i).equals(name)){
+                index = i;
+                break;
+            }
+        }
+        return index;
     }
 }

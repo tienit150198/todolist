@@ -1,11 +1,18 @@
 package com.example.todolist.Controller;
 
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.RectF;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.todolist.Interface.ItemTouchHelperAdapter;
+import com.example.todolist.R;
 
 public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
     ItemTouchHelperAdapter mListener;
@@ -19,7 +26,7 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
 
     @Override
     public boolean isLongPressDragEnabled() {
-        return true;
+        return false;
     }
 
     @Override

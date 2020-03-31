@@ -8,42 +8,39 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.todolist.Interface.OnItemListenerHelper;
 import com.example.todolist.Models.Item;
 import com.example.todolist.R;
 
-import java.util.ArrayList;
+import io.realm.OrderedRealmCollection;
+import io.realm.RealmRecyclerViewAdapter;
 
-public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
-    ArrayList<Item> mListItem;
-    Context mContext;
+public class ItemAdapter extends RealmRecyclerViewAdapter<Item, ItemAdapter.ItemViewHolder> {
+    public OnItemListenerHelper listener;
 
-    public ItemAdapter(ArrayList<Item> mListItem, Context mContext) {
-        this.mListItem = mListItem;
-        this.mContext = mContext;
+    public ItemAdapter(@NonNull Context context, @Nullable OrderedRealmCollection<Item> data, boolean autoUpdate, OnItemListenerHelper listener) {
+        super(context, data, autoUpdate);
+        this.listener = listener;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater layoutInflater = LayoutInflater.from(mContext);
+    public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View view = layoutInflater.inflate(R.layout.activity_recycler_item, parent, false);
 
-        return new ViewHolder(view);
+        return new ItemViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Item item = mListItem.get(position);
+    public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
+        Item item = getItem(position);
 
         holder.imgIcon.setImageResource(item.getIcon());
         holder.tvName.setText(item.getName());
-    }
-
-    @Override
-    public int getItemCount() {
-        return mListItem.size();
     }
 
     @Override
@@ -51,27 +48,17 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         return position;
     }
 
-    public OnItemClickListener listener;
-
-    public interface OnItemClickListener{
-        void onItemClick(View view, int position);
-    }
-
-    public void setOnItemClickListener(OnItemClickListener listener){
-        this.listener = listener;
-    }
-
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ItemViewHolder extends RecyclerView.ViewHolder {
         ImageView imgIcon;
         TextView tvName;
 
-        public ViewHolder(@NonNull final View itemView) {
+        public ItemViewHolder(@NonNull final View itemView) {
             super(itemView);
             imgIcon = itemView.findViewById(R.id.imgIcon);
             tvName = itemView.findViewById(R.id.tvName);
 
             itemView.setOnClickListener(v -> {
-                if(listener != null){
+                if (listener != null) {
                     listener.onItemClick(itemView, getAdapterPosition());
                 }
             });
