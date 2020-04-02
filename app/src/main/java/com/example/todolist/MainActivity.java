@@ -19,9 +19,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.todolist.Adapter.ItemAdapter;
 import com.example.todolist.Constants.Constants;
+import com.example.todolist.Controller.AppDatabase;
 import com.example.todolist.Controller.DialogHandler;
-import com.example.todolist.Controller.ItemModify;
-import com.example.todolist.Controller.SharedPreferenceHandler;
 import com.example.todolist.Interface.OnItemListenerHelper;
 import com.example.todolist.Models.Item;
 import com.example.todolist.Utils.Validate;
@@ -29,23 +28,17 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
-import io.realm.RealmResults;
-
 public class MainActivity extends AppCompatActivity implements OnItemListenerHelper {
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
     private Toolbar mToolbar;
     private ItemAdapter mItemAdapterListItem;
-    private RealmResults<Item> mRealmResult;
-    private Realm mRealm;
-    private ItemModify instanceItem;
     private RecyclerView mRecyclerViewListTask;
-    private SharedPreferenceHandler instanceSharedPreference;   // manager sublist in navigation drawer
     private Validate instanceValidate;   // manager sublist in navigation drawer
     private NoteFragment mNoteFragment;
     private DialogHandler mDialogHander;
+    private AppDatabase instanceData;
+    private ArrayList<Item> mItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,12 +46,16 @@ public class MainActivity extends AppCompatActivity implements OnItemListenerHel
         setContentView(R.layout.activity_main);
 
         init();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         config();
     }
 
     private void init() {
         mapp();
-        initRealm();
         initItem();
         initDialogHander();
     }
@@ -70,22 +67,10 @@ public class MainActivity extends AppCompatActivity implements OnItemListenerHel
         mRecyclerViewListTask = mNavigationView.findViewById(R.id.recycler_listTask);
     }
 
-    private void initRealm() {
-        Realm.init(this);
-        RealmConfiguration configNote = new RealmConfiguration.Builder().name(Constants.KEY_TABLE_NAME_ITEM)
-                .schemaVersion(1)
-                .build();
-
-        mRealm = Realm.getInstance(configNote);
-    }
-
     private void initItem() {
-        instanceItem = ItemModify.getInstance(mRealm);
-        mRealmResult = instanceItem.queryAllItem();
-
-        if (mRealmResult.size() == 0) {
-            instanceItem.insertItem(makeItem(R.drawable.all_list, Constants.KEY_SUBLIST_DEFAULT));
-        }
+        mItems = new ArrayList<>();
+        instanceData = AppDatabase.getInstance(this);
+        mItems = (ArrayList) instanceData.itemDao().queryAll();
     }
 
     private void initDialogHander() {
@@ -93,14 +78,11 @@ public class MainActivity extends AppCompatActivity implements OnItemListenerHel
     }
 
     private void config() {
-        instanceSharedPreference = SharedPreferenceHandler.getInstance(this);
         instanceValidate = Validate.getInstance(this);
 
         configActionBar();
         configAnimation();
         configRecyclerView();
-
-
     }
 
     private void configActionBar() {
@@ -120,18 +102,23 @@ public class MainActivity extends AppCompatActivity implements OnItemListenerHel
     }
 
     private void configRecyclerView() {
-        mItemAdapterListItem = new ItemAdapter(this, mRealmResult, true, this);
+        mItemAdapterListItem = new ItemAdapter(mItems, this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
         mRecyclerViewListTask.setAdapter(mItemAdapterListItem);
         mRecyclerViewListTask.setLayoutManager(linearLayoutManager);
         mRecyclerViewListTask.setHasFixedSize(true);
 
+        if (mItems.size() == 0) {
+            mItems.add(makeItem(R.drawable.sublist, Constants.KEY_SUBLIST_DEFAULT));
+            instanceData.itemDao().insertItem(makeItem(R.drawable.sublist, Constants.KEY_SUBLIST_DEFAULT));
+        }
+
         selectedItem(0);
     }
 
     private void selectedItem(int position) {
-        mToolbar.setTitle(mRealmResult.get(position).getName());
+        mToolbar.setTitle(mItems.get(position).getName());
         mNavigationView.setCheckedItem(position);
         clickFragment(position);
         mDrawerLayout.closeDrawers();
@@ -139,21 +126,12 @@ public class MainActivity extends AppCompatActivity implements OnItemListenerHel
 
     private void clickFragment(int position) {
         Bundle bundle = new Bundle();
-        bundle.putString(Constants.KEY_BUNDLE_SEND_FRAGMENT_SUBLISTNAME, mRealmResult.get(position).getName());
-        bundle.putStringArrayList(Constants.KEY_BUNDLE_SEND_FRAGMENT_LIST_NAME, convertRealmResultToArray(mRealmResult));
+        bundle.putString(Constants.KEY_BUNDLE_SEND_FRAGMENT_SUBLISTNAME, mItems.get(position).getName());
+        bundle.putStringArrayList(Constants.KEY_BUNDLE_SEND_FRAGMENT_LIST_NAME, (ArrayList) instanceData.itemDao().queryAllName());
         mNoteFragment = new NoteFragment();
         mNoteFragment.setArguments(bundle);
 
         getSupportFragmentManager().beginTransaction().replace(R.id.frm_main, mNoteFragment).commit();
-    }
-
-    private ArrayList<String> convertRealmResultToArray(RealmResults<Item> mRealmResult) {
-        ArrayList<String> listName = new ArrayList<>();
-        for (Item item : mRealmResult) {
-            listName.add(item.getName());
-        }
-
-        return listName;
     }
 
     private Item makeItem(int idIcon, String subName) {
@@ -162,17 +140,19 @@ public class MainActivity extends AppCompatActivity implements OnItemListenerHel
 
     private void deleteSublist() {
         String nameSublistCurrent = mToolbar.getTitle().toString();
-        int idSublistSelected = instanceValidate.findIndexWithId(mRealmResult, nameSublistCurrent);
+        int idSublistSelected = instanceValidate.findIndexWithId((ArrayList) instanceData.itemDao().queryAllName(), nameSublistCurrent);
 
         mNoteFragment.deleteSublist(nameSublistCurrent);
         // must always have the All sublist. Cannot delete sublist All
         if (idSublistSelected != -1 && !nameSublistCurrent.equals(Constants.KEY_SUBLIST_DEFAULT)) {
-            instanceItem.deleteItem(nameSublistCurrent);
+            instanceData.itemDao().deleteItem(mItems.get(idSublistSelected));
+            mItems.remove(idSublistSelected);
 
-            if (mRealmResult.size() > 0) {
+            if (mItems.size() > 0) {
                 selectedItem(0);
             }
         }
+        mItemAdapterListItem.notifyItemRemoved(idSublistSelected);
     }
 
     private void addSublist() {
@@ -185,11 +165,12 @@ public class MainActivity extends AppCompatActivity implements OnItemListenerHel
             public void onPositiveClick(String text) {
                 if (text.trim().isEmpty()) {
                     mDialogHander.notify(MainActivity.this, getString(R.string.dialog_title_notify), getString(R.string.dialog_messenger_empty), getString(R.string.dialog_button_ok));
-                } else if (instanceValidate.checkContainsInArrayList(mRealmResult, text.trim())) {
+                } else if (instanceValidate.checkContainsInArrayList(mItems, text.trim())) {
                     mDialogHander.notify(MainActivity.this, getString(R.string.dialog_title_notify), getString(R.string.dialog_messenger_existed), getString(R.string.dialog_button_ok));
                 } else {
-                    instanceItem.insertItem(makeItem(R.drawable.sublist, text.trim()));
-                    selectedItem(instanceValidate.findIndexWithId(mRealmResult, text.trim()));
+                    mItems.add(makeItem(R.drawable.sublist, text.trim()));
+                    instanceData.itemDao().insertItem(makeItem(R.drawable.sublist, text.trim()));
+                    selectedItem(instanceValidate.findIndexWithId((ArrayList) instanceData.itemDao().queryAllName(), text.trim()));
                 }
             }
         });
@@ -234,15 +215,15 @@ public class MainActivity extends AppCompatActivity implements OnItemListenerHel
         return true;
     }
 
-    @Override
-    protected void onDestroy() {
-        // close database
-        if (!mRealm.isClosed()) {
-            mRealm.close();
-        }
-        mNoteFragment.closeRealm();
-        super.onDestroy();
-    }
+//    @Override
+//    protected void onDestroy() {
+//        // close database
+//        if (!mRealm.isClosed()) {
+//            mRealm.close();
+//        }
+//        mNoteFragment.closeRealm();
+//        super.onDestroy();
+//    }
 
     @Override
     public void onItemClick(View view, int position) {

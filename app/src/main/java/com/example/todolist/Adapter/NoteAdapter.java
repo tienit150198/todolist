@@ -10,7 +10,6 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.todolist.Interface.OnItemListenerHelper;
@@ -19,17 +18,17 @@ import com.example.todolist.Models.Note;
 import com.example.todolist.R;
 import com.example.todolist.Utils.ColorUtility;
 
-import io.realm.OrderedRealmCollection;
-import io.realm.RealmRecyclerViewAdapter;
+import java.util.ArrayList;
 
-public class NoteAdapter extends RealmRecyclerViewAdapter<Note, NoteAdapter.ViewHolder> {
+public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
     private OnItemListenerHelper listener;
     private ColorUtility instanceColor;
+    private ArrayList<Note> mNotes;
 
-    public NoteAdapter(@Nullable OrderedRealmCollection<Note> data, boolean autoUpdate, Context context, OnItemListenerHelper listener) {
-        super(context, data, autoUpdate);
+    public NoteAdapter(Context context, ArrayList<Note> notes, OnItemListenerHelper listener) {
         this.listener = listener;
-        instanceColor = ColorUtility.getInstance(context);
+        this.mNotes = notes;
+        this.instanceColor = ColorUtility.getInstance(context);
     }
 
     @NonNull
@@ -43,7 +42,7 @@ public class NoteAdapter extends RealmRecyclerViewAdapter<Note, NoteAdapter.View
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-        final Note note = getItem(position);
+        final Note note = mNotes.get(position);
         holder.tvContent.setText(note.getContent());
         holder.cbContent.setBackgroundColor(instanceColor.getColor(note.getColor()));
         holder.tvContent.setBackgroundColor(instanceColor.getColor(note.getColor()));
@@ -59,6 +58,14 @@ public class NoteAdapter extends RealmRecyclerViewAdapter<Note, NoteAdapter.View
     @Override
     public long getItemId(int position) {
         return position;
+    }
+
+    @Override
+    public int getItemCount() {
+        if (mNotes != null) {
+            return mNotes.size();
+        }
+        return 0;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

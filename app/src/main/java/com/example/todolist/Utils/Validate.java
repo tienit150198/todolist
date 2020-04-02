@@ -7,7 +7,6 @@ import com.example.todolist.Models.Note;
 
 import java.util.ArrayList;
 
-import io.realm.RealmResults;
 
 public class Validate {
     private Context mContext;
@@ -24,20 +23,9 @@ public class Validate {
         return instance;
     }
 
-    public int findIndexWithId(RealmResults<Item> realmResults, String name){
-        int index = -1;
-        for(int i = 0 ; i < realmResults.size() ; i++){
-            if(realmResults.get(i).getName().equals(name)){
-                index = i;
-                break;
-            }
-        }
-        return index;
-    }
-
-    public boolean checkContainsInArrayList(RealmResults<Item> realmResults, String name){
-        for(int i = 0 ; i < realmResults.size() ; i++){
-            if(realmResults.get(i).getName().equals(name)){
+    public boolean checkContainsInArrayList(ArrayList<Item> items, String name){
+        for(int i = 0 ; i < items.size() ; i++){
+            if(items.get(i).getName().equals(name)){
                 return true;
             }
         }
@@ -48,6 +36,17 @@ public class Validate {
         int index = -1;
         for(int i = 0 ; i < listName.size() ; i++){
             if(listName.get(i).equals(name)){
+                index = i;
+                break;
+            }
+        }
+        return index;
+    }
+
+    public int findIndexWithId(ArrayList<Note> notes, int id){ // spinner gì
+        int index = -1;
+        for(int i = 0 ; i < notes.size() ; i++){
+            if(notes.get(i).getId() == id){
                 index = i;
                 break;
             }

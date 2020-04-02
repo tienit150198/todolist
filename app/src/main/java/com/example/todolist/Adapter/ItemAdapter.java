@@ -1,6 +1,5 @@
 package com.example.todolist.Adapter;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,22 +7,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.todolist.Interface.OnItemListenerHelper;
 import com.example.todolist.Models.Item;
 import com.example.todolist.R;
 
-import io.realm.OrderedRealmCollection;
-import io.realm.RealmRecyclerViewAdapter;
+import java.util.ArrayList;
 
-public class ItemAdapter extends RealmRecyclerViewAdapter<Item, ItemAdapter.ItemViewHolder> {
-    public OnItemListenerHelper listener;
+public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder> {
+    private OnItemListenerHelper listener;
+    private ArrayList<Item> mItems;
 
-    public ItemAdapter(@NonNull Context context, @Nullable OrderedRealmCollection<Item> data, boolean autoUpdate, OnItemListenerHelper listener) {
-        super(context, data, autoUpdate);
+    public ItemAdapter(ArrayList<Item> items, OnItemListenerHelper listener) {
         this.listener = listener;
+        this.mItems = items;
     }
 
     @NonNull
@@ -37,7 +35,7 @@ public class ItemAdapter extends RealmRecyclerViewAdapter<Item, ItemAdapter.Item
 
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
-        Item item = getItem(position);
+        Item item = mItems.get(position);
 
         holder.imgIcon.setImageResource(item.getIcon());
         holder.tvName.setText(item.getName());
@@ -46,6 +44,14 @@ public class ItemAdapter extends RealmRecyclerViewAdapter<Item, ItemAdapter.Item
     @Override
     public long getItemId(int position) {
         return position;
+    }
+
+    @Override
+    public int getItemCount() {
+        if (mItems != null) {
+            return mItems.size();
+        }
+        return 0;
     }
 
     public class ItemViewHolder extends RecyclerView.ViewHolder {

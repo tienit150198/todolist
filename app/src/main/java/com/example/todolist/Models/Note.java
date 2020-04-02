@@ -1,40 +1,30 @@
 package com.example.todolist.Models;
 
-import android.graphics.Color;
-import android.location.Location;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
+import com.example.todolist.Constants.Constants;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.Date;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import io.realm.RealmObject;
-import io.realm.annotations.Ignore;
-import io.realm.annotations.PrimaryKey;
-
-public class Note extends RealmObject{
-    @PrimaryKey
+@Entity(tableName = Constants.KEY_TABLE_NAME_NOTE)
+public class Note implements Serializable {
+    @PrimaryKey(autoGenerate = true)
     private int id;
     private String content;
     private int color;
     private boolean isChecked;
-    private int index;
     private String nameSublist;
-    private Date dateCreate;
-    public Note(){}
-
-    public Note(int id, String content, int index) {
-        this.id = id;
-        this.content = content;
-        this.index = index;
-        this.color = 0;
+    @Ignore
+    private Date createAt;
+    public Note() {
     }
 
-    public Note(int id, String content, int index, String nameSublist) {
-        this.id = id;
+    @Ignore
+    public Note(String content, String nameSublist) {
         this.content = content;
-        this.index = index;
         this.nameSublist = nameSublist;
         this.color = 0;
     }
@@ -71,28 +61,12 @@ public class Note extends RealmObject{
         isChecked = checked;
     }
 
-    public int getIndex() {
-        return index;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
-    }
-
     public String getNameSublist() {
         return nameSublist;
     }
 
     public void setNameSublist(String nameSublist) {
         this.nameSublist = nameSublist;
-    }
-
-    public Date getDateCreate() {
-        return dateCreate;
-    }
-
-    public void setDateCreate(Date dateCreate) {
-        this.dateCreate = dateCreate;
     }
 
     @Override
@@ -102,9 +76,7 @@ public class Note extends RealmObject{
                 ", content='" + content + '\'' +
                 ", color=" + color +
                 ", isChecked=" + isChecked +
-                ", index=" + index +
                 ", nameSublist='" + nameSublist + '\'' +
-                ", dateCreate=" + dateCreate +
                 '}';
     }
 }

@@ -3,7 +3,6 @@ package com.example.todolist;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -22,7 +21,6 @@ import com.example.todolist.Controller.DialogHandler;
 import com.example.todolist.Models.Note;
 import com.example.todolist.Utils.Validate;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 
@@ -77,10 +75,8 @@ public class EditActivity extends AppCompatActivity implements DialogHandler.OnD
 
         Bundle bundle = it.getExtras();
 
-        Gson gson = new Gson();
-        String text = bundle.getString(Constants.KEY_INTENT_SEND_ACTIVITY);
+        noteEdited = (Note) bundle.getSerializable(Constants.KEY_INTENT_SEND_ACTIVITY);
         mListItemName = bundle.getStringArrayList(Constants.KEY_BUNDLE_SEND_FRAGMENT_LIST_NAME);
-        noteEdited = gson.fromJson(text, Note.class);
 
         if (noteEdited != null) {
             tedt_content_edit.setText(noteEdited.getContent());
@@ -134,15 +130,14 @@ public class EditActivity extends AppCompatActivity implements DialogHandler.OnD
         Toast.makeText(this, "Delete", Toast.LENGTH_SHORT).show();
     }
 
+    // đây là trả dữ liệu về
     private void saveData() {
-        Intent intent = new Intent(this, NoteFragment.class);
+        Intent intent = new Intent(EditActivity.this, NoteFragment.class);
         noteEdited.setContent(tedt_content_edit.getText().toString());
         noteEdited.setChecked(cb_content_edit.isChecked());
         noteEdited.setNameSublist(tv_sublist_name_edit.getText().toString());
 
-        Gson gson = new Gson();
-        String textNote = gson.toJson(noteEdited);
-        intent.putExtra(Constants.KEY_INTENT_SEND_ACTIVITY, textNote);
+        intent.putExtra(Constants.KEY_INTENT_SEND_ACTIVITY, noteEdited);
         setResult(Constants.KEY_RESULT, intent);
 
         finish();
